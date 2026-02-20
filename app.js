@@ -17,9 +17,11 @@ const User = require("./models/user.js");
 const listingRouter = require("./routes/listing.js");
 const reviewRouter =  require("./routes/review.js");
 const userRouter = require("./routes/user.js");
+const PORT = process.env.PORT || 8080;
 
 // const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust" ;
 const dbUrl = process.env.ATLAS_DB_URL;
+const secret = process.env.SECRET || "wanderlustsecret";
 
 main()
 .then(() => {
@@ -41,18 +43,18 @@ app.use(express.static(path.join(__dirname,"/public")))
 const store = MongoStore.create({
     mongoUrl: dbUrl,
     crypto : {
-        secret : process.env.SECRET,
+        secret,
     },
     touchAfter : 24 * 3600,
 })
 
-    store.on("error",() => {
+    store.on("error",(err) => {
         console.log("ERROR IN MONGO SESSION STORE",err);
     })
 
 const sessionOptions = {
     store,
-    secret : process.env.SECRET,
+    secret,
     resave : false,
     saveUninitialized : true,
     cookie : {
@@ -82,6 +84,10 @@ app.use((req,res,next) => {
     res.locals.error = req.flash("error");
     res.locals.currUser = req.user;
     next();
+});
+
+app.get("/", (req, res) => {
+    res.redirect("/listings");
 });
 
 // app.get("/demouser", async (req,res) => {
@@ -122,6 +128,6 @@ app.use((err,req,res,next) => {
     // res.status(statusCode).send(message);
 })
 
-app.listen(8080, () => {
-    console.log("server is listening to port 8080");
+app.listen(PORT, () => {
+    console.log(`server is listening to port ${PORT}`);
 })
