@@ -35,7 +35,7 @@ WanderLust is a full-stack web application inspired by Airbnb, allowing users to
 
 1. **Clone the repository:**
    ```bash
-   git clone <repo-url>
+   git clone https://github.com/SujalP21/WanderLust
    cd WanderLust
    ```
 2. **Install dependencies:**
