@@ -18,8 +18,14 @@ const listingRouter = require("./routes/listing.js");
 const reviewRouter =  require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 
-// const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust" ;
-const dbUrl = process.env.ATLAS_DB_URL;
+const localDbUrl = process.env.LOCAL_DB_URL || "mongodb://127.0.0.1:27017/wanderlust";
+const dbUrl = process.env.NODE_ENV === "production"
+    ? process.env.ATLAS_DB_URL
+    : localDbUrl;
+
+if (!dbUrl) {
+    throw new Error("Database URL is missing. Set ATLAS_DB_URL in production or LOCAL_DB_URL for local development.");
+}
 
 main()
 .then(() => {
@@ -46,8 +52,8 @@ const store = MongoStore.create({
     touchAfter : 24 * 3600,
 })
 
-    store.on("error",() => {
-        console.log("ERROR IN MONGO SESSION STORE",err);
+    store.on("error",(err) => {
+        console.log("ERROR IN MONGO SESSION STORE", err);
     })
 
 const sessionOptions = {
@@ -80,7 +86,7 @@ passport.deserializeUser(User.deserializeUser());
 app.use((req,res,next) => {
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
-    res.locals.currUser = req.user;
+    res.locals.currUser = req.user || null;
     next();
 });
 
